@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Likering</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+   <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --dark-background: #121212;
+            --dark-grey: #1a1a1a;
+            --light-grey: #2e2e2e;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --plan-azul: #00A4E6;
+            --plan-rojo: #F92B75;
+            --plan-naranja: #FFA500;
+            --plan-verde: #28a745;
+            --plan-morado: #8A2BE2;
+            --plan-negro: #E0E0E0;
+            --plan-amarillo: #FFD700;
+            --plan-color-principal: var(--plan-azul);
+        }
+
+        .plan-azul { --plan-color-principal: var(--plan-azul); }
+        .plan-rojo { --plan-color-principal: var(--plan-rojo); }
+        .plan-naranja { --plan-color-principal: var(--plan-naranja); }
+        .plan-verde { --plan-color-principal: var(--plan-verde); }
+        .plan-morado { --plan-color-principal: var(--plan-morado); }
+        .plan-negro { --plan-color-principal: var(--plan-negro); }
+        .plan-amarillo { --plan-color-principal: var(--plan-amarillo); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; display: flex; justify-content: center; background: var(--dark-background); color: var(--text-primary); }
+        .app-screen { width: 100%; min-height: 100vh; position: relative; overflow-x: hidden; display: flex; flex-direction: column; }
+        
+        .profile-header {
+            width: 100%;
+            padding: 60px 25px 25px;
+            color: var(--text-primary);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            position: relative;
+            z-index: 2;
+            background: var(--dark-grey);
+            border-bottom: 1px solid var(--light-grey);
+        }
+
+        .header-icon {
+            background: var(--light-grey);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-primary);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-icon:hover { 
+            background: var(--plan-color-principal); 
+            transform: scale(1.1); 
+        }
+
+        .header-top-row {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .plan-name-badge { 
+            display: none;
+        }
+
+        .profile-top-section {
+            display: flex;
+            flex-direction: column; 
+            align-items: center;   
+            gap: 25px; 
+            width: 100%;
+        }
+
+        .profile-user-details {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 15px; 
+        }
+
+        .profile-picture {
+            width: 90px;
+            height: 90px;
+            border-radius: 15px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+            border: 3px solid var(--plan-color-principal);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-picture:hover {
+            transform: scale(1.05);
+        }
+
+        .edit-profile-icon {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background: var(--plan-color-principal);
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border: 2px solid var(--dark-grey);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .edit-profile-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            gap: 8px;
+        }
+
+        .profile-username {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .profile-bio {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--plan-color-principal);
+            background: rgba(255,255,255,0.05);
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: inline-block;
+            width: fit-content;
+        }
+        
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px; 
+            width: 100%; 
+        }
+
+        .stat-item {
+            background: transparent;
+            border: 1px solid var(--light-grey);
+            padding: 20px;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-item:hover {
+            border-color: var(--plan-color-principal);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-item i {
+            font-size: 1.8rem;
+            color: var(--plan-color-principal);
+            flex-shrink: 0;
+        }
+
+        .stat-number {
+            font-size: 1.5rem; 
+            font-weight: 700;
+            display: block;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.8rem; 
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .profile-actions button {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .studio-btn {
+            background: var(--plan-color-principal);
+            color: white;
+        }
+
+        .share-btn {
+            background: var(--light-grey);
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .studio-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .share-btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .video-thumbnail {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            aspect-ratio: 9/16;
+            background-color: var(--light-grey);
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .video-thumbnail:hover {
+            transform: scale(1.02);
+        }
+
+        .video-thumbnail:hover img {
+            transform: scale(1.05);
+        }
+
+        .video-stats-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .upload-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s;
+        }
+
+        .upload-modal-overlay.visible { display: flex; opacity: 1; }
+
+        .upload-modal-content {
+            background: var(--dark-grey);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 420px;
+            border: 1px solid var(--light-grey);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: var(--light-grey);
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--plan-color-principal);
+            color: white;
+        }
+
+        .modal-subtitle {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--light-grey);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-subtitle i {
+            color: var(--plan-color-principal);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .cancel-button {
+            background: var(--light-grey);
+            color: var(--text-primary);
+        }
+
+        .submit-button {
+            background: var(--plan-color-principal);
+            color: white;
+        }
+
+        .modal-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .edit-profile-view {
+            display: none;
+        }
+
+        .edit-profile-view.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .edit-profile-picture-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 15px;
+            margin: 0 auto 20px;
+            background-size: cover;
+            background-position: center;
+            border: 3px solid var(--plan-color-principal);
+        }
+
+        #camera-view video {
+            width: 100%;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            background: var(--light-grey);
+            border: 1px solid transparent;
+            border-radius: 10px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--plan-color-principal);
+        }
+
+        .back-btn {
+            background: var(--light-grey);
+            border: none;
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--plan-color-principal);
+        }
+        
+        /* --- ESTILOS PARA LA NUEVA MODAL DE COMPARTIR --- */
+        .share-modal-body {
+            padding: 10px 0;
+            text-align: center;
+        }
+        .share-modal-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+        }
+        .social-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .social-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+        .social-link:hover {
+            transform: scale(1.1);
+        }
+        .social-link i {
+            font-size: 2.5rem; /* Iconos más grandes */
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        /* Colores de redes sociales */
+        .social-link .fa-whatsapp { background-color: #25D366; }
+        .social-link .fa-facebook-f { background-color: #1877F2; }
+        .social-link .fa-twitter { background-color: #1DA1F2; }
+        .social-link .fa-telegram { background-color: #0088cc; }
+        .social-link .fa-envelope { background-color: #7f7f7f; }
+
+        .copy-link-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 20px;
+        }
+        #profile-link-input {
+            flex-grow: 1;
+            font-size: 0.9rem;
+            text-overflow: ellipsis;
+            background-color: var(--dark-background); /* Input más oscuro */
+        }
+        #copy-link-btn {
+            flex-shrink: 0;
+            padding: 12px 15px;
+        }
+        /* ----------------------------------------------- */
+
+        @media (max-width: 480px) {
+            .profile-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                width: 100%;
+            }
+            
+            .profile-picture {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .profile-username {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-screen">
+        <div class="profile-header">
+            <div class="header-top-row">
+                <a href="Videos.html" class="header-icon"><i class="fas fa-arrow-left"></i></a>
+            </div>
+            <div class="profile-top-section">
+                <div class="profile-user-details">
+                    <div id="profile-picture" class="profile-picture">
+                        <div class="edit-profile-icon" id="edit-profile-btn" title="Editar Perfil">
+                            <i class="fas fa-pencil-alt"></i>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <h2 id="profile-username" class="profile-username"></h2>
+                        <p id="profile-bio" class="profile-bio"></p>
+                    </div>
+                </div>
+                <div class="profile-stats" id="profile-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-pen-to-square"></i>
+                        <div>
+                            <span id="posts-count" class="stat-number">0</span>
+                            <span class="stat-label">Contenido</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <span id="followers-count" class="stat-number">0</span>
+                            <span class="stat-label">Seguidores</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-user-plus"></i>
+                        <div>
+                            <span id="following-count" class="stat-number">0</span>
+                            <span class="stat-label">Siguiendo</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-heart"></i>
+                        <div>
+                            <span id="likes-count" class="stat-number">0</span>
+                            <span class="stat-label">Likes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-actions">
+                <button class="studio-btn" id="open-studio-btn">
+                    <i class="fas fa-video"></i> Estudio
+                </button>
+                <button class="share-btn" id="share-profile-btn">
+                    <i class="fas fa-share-alt"></i> Compartir Perfil
+                </button>
+                <button class="share-btn" id="wallet-btn">
+                    <i class="fas fa-wallet"></i> Billetera
+                </button>
+            </div>
+        </div>
+        <div class="video-grid" id="video-grid-container"></div>
+        <input type="file" id="profile-picture-input" style="display: none;" accept="image/*">
+        
+        <div class="upload-modal-overlay" id="edit-profile-modal">
+            <div class="upload-modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="edit-modal-title">Editar Perfil</h3>
+                    <button class="modal-close" id="modal-close-btn-edit"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="edit-profile-view active" id="main-edit-view">
+                    <h4 class="modal-subtitle"><i class="fas fa-user-circle"></i>Foto de Perfil</h4>
+                    <div class="edit-profile-picture-preview" id="edit-profile-picture-preview"></div>
+                    <div class="modal-actions">
+                        <button type="button" class="modal-button cancel-button" id="upload-from-gallery-btn">
+                            <i class="fas fa-images"></i> Subir Foto
+                        </button>
+                        <button type="button" class="modal-button cancel-button" id="take-photo-btn">
+                            <i class="fas fa-camera"></i> Tomar Foto
+                        </button>
+                    </div>
+                    <hr style="border-color: rgba(255,255,255,0.1); margin: 25px 0;">
+                    <h4 class="modal-subtitle"><i class="fas fa-shield-alt"></i>Cuenta</h4>
+                    <div class="modal-actions" style="margin-top: 16px;">
+                        <button type="button" class="modal-button submit-button" id="edit-account-btn">
+                            <i class="fas fa-key"></i> Cambiar Contraseña
+                        </button>
+                    </div>
+                </div>
+                <div class="edit-profile-view" id="camera-view">
+                    <h4 class="modal-subtitle">Tomar Foto</h4>
+                    <video id="camera-video" autoplay playsinline></video>
+                    <canvas id="camera-canvas" style="display:none;"></canvas>
+                    <div class="modal-actions">
+                           <button type="button" class="modal-button cancel-button" id="cancel-camera-btn">Cancelar</button>
+                           <button type="button" class="modal-button submit-button" id="capture-photo-btn">
+                                <i class="fas fa-camera"></i> Capturar
+                           </button>
+                    </div>
+                </div>
+                <div class="edit-profile-view" id="password-edit-view">
+                       <button type="button" class="back-btn" id="back-to-main-edit-btn" style="margin-bottom: 20px;">
+                            <i class="fas fa-arrow-left"></i> Volver
+                       </button>
+                    <form id="password-form">
+                        <div class="form-group">
+                            <label class="form-label">Nueva Contraseña</label>
+                            <input type="password" id="new-password" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirmar Contraseña</label>
+                            <input type="password" id="confirm-password" class="form-input" required>
+                        </div>
+                        <div id="password-status" style="text-align:center; min-height: 20px; font-weight: 500;"></div>
+                        <div class="modal-actions">
+                            <button type="submit" class="modal-button submit-button" id="save-password-btn">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-modal-overlay" id="share-modal">
+            <div class="upload-modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Compartir Perfil</h3>
+                    <button class="modal-close" id="share-modal-close-btn"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="share-modal-body">
+                    <p class="share-modal-text">Comparte el perfil de @<span id="share-username"></span> a través de tus redes sociales.</p>
+                    <div class="social-links-grid" id="social-links-container">
+                        </div>
+                    <div class="copy-link-container">
+                        <input type="text" id="profile-link-input" readonly class="form-input">
+                        <button id="copy-link-btn" class="modal-button submit-button">
+                            <i class="fas fa-copy"></i> Copiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyck3vesbAdynXl5OJdua80iQo1Ju6fHZaYd_mslNmCbrcw4nx1RVc2xEQQHsy3Lt0kDg/exec';
+    const CLOUDINARY_CLOUD_NAME = "dc7s64lvz";
+    const CLOUDINARY_UPLOAD_PRESET = "my_unsigned_preset";
+    const CLOUDINARY_API_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`;
+
+    let loggedInUser = null;
+    let loadedUserVideos = [];
+    let cameraStream = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (loggedInUser && loggedInUser.plan) {
+            document.body.className = `plan-${loggedInUser.plan.toLowerCase()}`;
+            document.getElementById('profile-username').textContent = `@${loggedInUser.username}`;
+            document.getElementById('profile-picture').style.backgroundImage = `url('${loggedInUser.imageUrl}')`;
+            document.getElementById('profile-bio').textContent = `PLAN ${loggedInUser.plan.toUpperCase()}`;
+            
+            loadRealProfileData(loggedInUser.username);
+            loadUserVideos(loggedInUser.username);
+            setupEventListeners();
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
+
+    function displayProfileData(userData) {
+        document.body.className = `plan-${userData.plan.toLowerCase()}`;
+        document.getElementById('profile-username').textContent = `@${userData.username}`;
+        document.getElementById('profile-picture').style.backgroundImage = `url('${userData.imageUrl}')`;
+        
+        document.getElementById('followers-count').textContent = userData.followers || '0';
+        document.getElementById('following-count').textContent = userData.following || '0';
+        document.getElementById('likes-count').textContent = userData.likes || '0';
+        
+        document.getElementById('profile-bio').textContent = `PLAN ${userData.plan.toUpperCase()}`;
+        
+        loadRealProfileData(userData.username);
+    }
+
+    async function refreshProfileData() {
+        if (!loggedInUser) return;
+        try {
+            const updateResponse = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'updateFollowCounters' })
+            });
+            await loadRealProfileData(loggedInUser.username);
+        } catch (error) {
+            console.error('❌ Error al actualizar datos:', error);
+        }
+    }
+
+    async function loadRealProfileData(username) {
+        try {
+            const params = new URLSearchParams({ action: 'getUserProfile', user: username });
+            const response = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                const realData = result.data;
+                document.getElementById('followers-count').textContent = realData.followers || '0';
+                document.getElementById('following-count').textContent = realData.following || '0';
+                document.getElementById('likes-count').textContent = realData.likes || '0';
+                const updatedUser = { ...loggedInUser, ...realData };
+                localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+                loggedInUser = updatedUser;
+            } else {
+                console.error(`❌ Error al cargar datos reales:`, result.message);
+            }
+        } catch (error) {
+            console.error('❌ Error al cargar datos reales del perfil:', error);
+        }
+    }
+
+    async function loadUserVideos(username) {
+        const videoGridContainer = document.getElementById('video-grid-container');
+        try {
+            const params = new URLSearchParams({ action: 'getVideosForUser', user: username });
+            const response = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+            const result = await response.json();
+            if (result.success) {
+                loadedUserVideos = result.data;
+                document.getElementById('posts-count').textContent = loadedUserVideos.length;
+                populateVideoGrid();
+            } else { throw new Error(result.message); }
+        } catch (error) {
+            videoGridContainer.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding:20px;">Error al cargar videos.</p>`;
+        }
+    }
+
+    function populateVideoGrid() {
+        const videoGridContainer = document.getElementById('video-grid-container');
+        let gridHTML = '';
+        if (loadedUserVideos.length === 0) {
+            gridHTML = '<p style="color:var(--text-secondary); text-align:center; padding:20px;">Aún no tienes videos. ¡Sube el primero!</p>';
+        } else {
+            loadedUserVideos.forEach(video => {
+                gridHTML += `<div class="video-thumbnail" data-video-id="${video.videoId}" data-user="${video.user}"><img src="${video.thumbnailUrl}" alt="${video.titulo || 'Miniatura'}"><div class="video-stats-overlay"><i class="fas fa-play"></i>&nbsp;<span>${video.visualizaciones || 0}</span></div></div>`;
+            });
+        }
+        videoGridContainer.innerHTML = gridHTML;
+        videoGridContainer.querySelectorAll('.video-thumbnail').forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                window.location.href = `Videos.html?user=${thumb.dataset.user}&videoId=${thumb.dataset.videoId}`;
+            });
+        });
+    }
+    
+    function setupEventListeners() {
+        document.getElementById('open-studio-btn').addEventListener('click', () => window.location.href = 'Editor.html');
+        // MODIFICADO: El botón de compartir ahora llama a la función para abrir la modal
+        document.getElementById('share-profile-btn').addEventListener('click', handleShareProfileClick);
+        document.getElementById('wallet-btn').addEventListener('click', () => window.location.href = 'Billetera.html');
+
+        // --- Listeners para la Modal de Editar Perfil ---
+        const editModal = document.getElementById('edit-profile-modal');
+        const mainEditView = document.getElementById('main-edit-view');
+        const cameraView = document.getElementById('camera-view');
+        const passwordView = document.getElementById('password-edit-view');
+        
+        const showView = (viewToShow) => {
+            [mainEditView, cameraView, passwordView].forEach(v => v.classList.remove('active'));
+            viewToShow.classList.add('active');
+        };
+
+        document.getElementById('edit-profile-btn').addEventListener('click', () => {
+            document.getElementById('edit-profile-picture-preview').style.backgroundImage = `url('${loggedInUser.imageUrl}')`;
+            showView(mainEditView);
+            editModal.classList.add('visible');
+        });
+        document.getElementById('modal-close-btn-edit').addEventListener('click', () => {
+            editModal.classList.remove('visible');
+            stopCamera();
+        });
+        
+        document.getElementById('profile-picture').addEventListener('click', (e) => {
+             if (e.target.id !== 'edit-profile-btn' && !e.target.closest('#edit-profile-btn')) {
+                 document.getElementById('profile-picture-input').click();
+             }
+        });
+        document.getElementById('upload-from-gallery-btn').addEventListener('click', () => document.getElementById('profile-picture-input').click());
+        document.getElementById('profile-picture-input').addEventListener('change', (e) => {
+            if (e.target.files[0]) handleNewProfilePicture(e.target.files[0]);
+        });
+
+        document.getElementById('take-photo-btn').addEventListener('click', () => { showView(cameraView); startCamera(); });
+        document.getElementById('cancel-camera-btn').addEventListener('click', () => { stopCamera(); showView(mainEditView); });
+        document.getElementById('edit-account-btn').addEventListener('click', () => showView(passwordView));
+        document.getElementById('back-to-main-edit-btn').addEventListener('click', () => showView(mainEditView));
+        
+        document.getElementById('capture-photo-btn').addEventListener('click', capturePhoto);
+        document.getElementById('password-form').addEventListener('submit', handlePasswordChange);
+
+        // --- NUEVO: Listeners para la Modal de Compartir ---
+        const shareModal = document.getElementById('share-modal');
+        document.getElementById('share-modal-close-btn').addEventListener('click', () => shareModal.classList.remove('visible'));
+        document.getElementById('copy-link-btn').addEventListener('click', copyProfileLink);
+    }
+    
+    // ***** NUEVA FUNCIÓN PARA ABRIR LA MODAL DE COMPARTIR *****
+    function handleShareProfileClick() {
+        if (!loggedInUser) return;
+
+        const profileUrl = `${window.location.origin}${window.location.pathname.replace('perfil.html', 'Streamer.html')}?user=${loggedInUser.username}`;
+        const shareText = `¡Mira el perfil de ${loggedInUser.username} en Likering!`;
+        const encodedUrl = encodeURIComponent(profileUrl);
+        const encodedText = encodeURIComponent(shareText);
+
+        document.getElementById('share-username').textContent = loggedInUser.username;
+        document.getElementById('profile-link-input').value = profileUrl;
+
+        const socialContainer = document.getElementById('social-links-container');
+        socialContainer.innerHTML = `
+            <a href="https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}" target="_blank" class="social-link">
+                <i class="fab fa-whatsapp"></i><span>WhatsApp</span>
+            </a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" target="_blank" class="social-link">
+                <i class="fab fa-facebook-f"></i><span>Facebook</span>
+            </a>
+            <a href="https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}" target="_blank" class="social-link">
+                <i class="fab fa-twitter"></i><span>Twitter</span>
+            </a>
+            <a href="https://t.me/share/url?url=${encodedUrl}&text=${encodedText}" target="_blank" class="social-link">
+                <i class="fab fa-telegram"></i><span>Telegram</span>
+            </a>
+            <a href="mailto:?subject=${encodedText}&body=${encodedText}%20${encodedUrl}" class="social-link">
+                <i class="fas fa-envelope"></i><span>Email</span>
+            </a>
+        `;
+
+        document.getElementById('share-modal').classList.add('visible');
+    }
+
+    // ***** NUEVA FUNCIÓN PARA COPIAR EL ENLACE *****
+    async function copyProfileLink() {
+        const linkInput = document.getElementById('profile-link-input');
+        const copyBtn = document.getElementById('copy-link-btn');
+        const originalBtnHTML = copyBtn.innerHTML;
+
+        try {
+            await navigator.clipboard.writeText(linkInput.value);
+            copyBtn.innerHTML = '<i class="fas fa-check"></i> Copiado';
+            copyBtn.style.background = 'var(--plan-verde)'; // Color de éxito
+
+            setTimeout(() => {
+                copyBtn.innerHTML = originalBtnHTML;
+                copyBtn.style.background = ''; // Revertir al color original
+            }, 2500);
+        } catch (err) {
+            console.error('Error al copiar el enlace:', err);
+            linkInput.select();
+            document.execCommand('copy');
+            alert('¡Enlace del perfil copiado al portapapeles!');
+        }
+    }
+
+    async function uploadToCloudinary(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        const response = await fetch(CLOUDINARY_API_URL, { method: 'POST', body: formData });
+        if (!response.ok) throw new Error('Error al subir a Cloudinary');
+        return (await response.json()).secure_url;
+    }
+
+    async function handleNewProfilePicture(file) {
+        const editModal = document.getElementById('edit-profile-modal');
+        alert('Subiendo nueva foto...');
+        try {
+            const newImageUrl = await uploadToCloudinary(file);
+            const payload = { action: 'updateProfilePicture', username: loggedInUser.username, imageUrl: newImageUrl };
+            const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('profile-picture').style.backgroundImage = `url('${newImageUrl}')`;
+                loggedInUser.imageUrl = newImageUrl;
+                localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                alert('Foto de perfil actualizada.');
+                editModal.classList.remove('visible');
+            } else { throw new Error(result.message); }
+        } catch (error) {
+            alert(`Error al subir la foto: ${error.message}`);
+        }
+    }
+
+    async function handlePasswordChange(e) {
+        e.preventDefault();
+        const newPass = document.getElementById('new-password').value;
+        const confirmPass = document.getElementById('confirm-password').value;
+        const statusDiv = document.getElementById('password-status');
+        statusDiv.textContent = '';
+        if (newPass.length < 4) { statusDiv.textContent = 'Mínimo 4 caracteres.'; return; }
+        if (newPass !== confirmPass) { statusDiv.textContent = 'Las contraseñas no coinciden.'; return; }
+        
+        const btn = document.getElementById('save-password-btn');
+        btn.disabled = true; btn.textContent = 'Guardando...';
+
+        try {
+             const payload = { action: 'updatePassword', username: loggedInUser.username, newPassword: newPass };
+             const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+             const result = await response.json();
+             if(result.success) {
+                alert('Contraseña actualizada con éxito.');
+                document.getElementById('edit-profile-modal').classList.remove('visible');
+             } else { throw new Error(result.message); }
+        } catch (error) {
+            statusDiv.textContent = `Error: ${error.message}`;
+        } finally {
+            btn.disabled = false; btn.textContent = 'Guardar';
+        }
+    }
+
+    async function startCamera() {
+        if (navigator.mediaDevices?.getUserMedia) {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                document.getElementById('camera-video').srcObject = cameraStream;
+            } catch (error) {
+                alert("No se pudo acceder a la cámara.");
+                document.querySelector('#back-to-main-edit-btn').click();
+            }
+        }
+    }
+
+    function stopCamera() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+    }
+
+    function capturePhoto() {
+        const canvas = document.getElementById('camera-canvas');
+        const video = document.getElementById('camera-video');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+        stopCamera();
+        canvas.toBlob(blob => {
+            const photoFile = new File([blob], "camera-shot.jpg", { type: "image/jpeg" });
+            handleNewProfilePicture(photoFile);
+        }, 'image/jpeg');
+    }
+   </script>
+</body>
+</html>

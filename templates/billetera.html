@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billetera - Likering</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        :root {
+            --dark-background: #121212;
+            --dark-grey: #1a1a1a;
+            --light-grey: #2e2e2e;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8b8;
+            
+            /* ESTILOS DE TEMA COPIADOS DE PERFIL.HTML */
+            --plan-azul: #00A4E6;
+            --plan-rojo: #F92B75;
+            --plan-naranja: #FFA500;
+            --plan-verde: #28a745;
+            --plan-morado: #8A2BE2;
+            --plan-negro: #E0E0E0;
+            --plan-amarillo: #FFD700; 
+
+            --plan-color-principal: var(--plan-azul);
+        }
+
+        .plan-azul { --plan-color-principal: var(--plan-azul); }
+        .plan-rojo { --plan-color-principal: var(--plan-rojo); }
+        .plan-naranja { --plan-color-principal: var(--plan-naranja); }
+        .plan-verde { --plan-color-principal: var(--plan-verde); }
+        .plan-morado { --plan-color-principal: var(--plan-morado); }
+        .plan-negro { --plan-color-principal: var(--plan-negro); }
+        .plan-amarillo { --plan-color-principal: var(--plan-amarillo); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1a1a1a;
+        }
+        .iphone-frame {
+            width: 375px;
+            height: 812px;
+            background-color: #000;
+            border-radius: 40px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(255, 255, 255, 0.2);
+            position: relative;
+            border: 8px solid #222;
+        }
+        .app-screen {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            border-radius: 32px;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-primary);
+        }
+        .iphone-frame::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background-color: #000;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 101;
+        }
+        .background-slideshow, .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        }
+        .background-slideshow { z-index: 1; }
+        .overlay { background: rgba(0, 0, 0, 0.6); z-index: 2; }
+        .background-slideshow div {
+            position: absolute; width: 100%; height: 100%; background-size: cover; background-position: center;
+            opacity: 0; filter: blur(8px); transform: scale(1.2); animation: image-fade 24s infinite;
+        }
+        .background-slideshow div:nth-child(1) { background-image: url('https://images.pexels.com/photos/1535244/pexels-photo-1535244.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); animation-delay: 0s; }
+        .background-slideshow div:nth-child(2) { background-image: url('https://images.pexels.com/photos/1799042/pexels-photo-1799042.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); animation-delay: 6s; }
+        .background-slideshow div:nth-child(3) { background-image: url('https://images.pexels.com/photos/2787216/pexels-photo-2787216.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); animation-delay: 12s; }
+        .background-slideshow div:nth-child(4) { background-image: url('https://images.pexels.com/photos/2883049/pexels-photo-2883049.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); animation-delay: 18s; }
+        @keyframes image-fade {
+            0% { opacity: 0; } 8% { opacity: 1; } 25% { opacity: 1; } 33% { opacity: 0; } 100% { opacity: 0; }
+        }
+        .wallet-content {
+            position: relative; z-index: 3; display: flex; flex-direction: column; padding: 25px; height: 100%;
+        }
+        .wallet-header { text-align: center; padding-top: 30px; margin-bottom: 25px; }
+        .wallet-header h1 { font-size: 1.5rem; font-weight: 600; }
+        
+        .wallet-card {
+            width: 100%; padding: 25px; border-radius: 20px;
+            background: linear-gradient(145deg, #1f2a36, #11161a);
+            border-top: 2px solid var(--plan-color-principal); /* Borde dinámico */
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 30px rgba(0, 164, 230, 0.15);
+        }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .card-logo { width: 40px; height: auto; opacity: 0.7; }
+        .plan-name { text-align: left; font-weight: 700; font-size: 0.9rem;
+            color: var(--plan-color-principal); /* Color de plan dinámico */
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px var(--plan-color-principal);
+        }
+        .wallet-section h2 { font-size: 1rem; font-weight: 400; color: var(--text-secondary); margin-bottom: 15px; }
+        .wallet-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 0.9rem; }
+        .wallet-row .label { color: var(--text-secondary); }
+        .wallet-row .value { font-weight: 600; font-size: 1.1rem; }
+        .ganancias .wallet-row .value { font-size: 1.5rem; font-weight: 700; }
+        .separator { border: none; height: 1px; background-color: rgba(255, 255, 255, 0.1); margin: 20px 0; }
+        
+        .action-buttons { display: flex; gap: 15px; width: 100%; margin-top: auto; padding-bottom: 20px; }
+        .action-buttons button { flex-grow: 1; padding: 16px; border-radius: 12px; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+        .action-buttons button:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        .btn-primary { background-color: var(--plan-color-principal); color: var(--dark-background); } /* Botón dinámico */
+        .btn-secondary { background-color: #3a3a3a; color: var(--text-primary); }
+
+    </style>
+</head>
+<body>
+
+    <div class="iphone-frame">
+        <div class="app-screen">
+            
+            <div class="background-slideshow">
+                <div></div> <div></div> <div></div> <div></div>
+            </div>
+            <div class="overlay"></div>
+
+            <div class="wallet-content">
+                <div class="wallet-header">
+                    <h1>Billetera</h1>
+                </div>
+
+                <div class="wallet-card">
+                    <div class="card-header">
+                        <div class="plan-name" id="plan-name"></div>
+                        <img src="https://i.postimg.cc/FKgZRLrW/image.png" alt="Logo" class="card-logo">
+                    </div>
+                    <div class="wallet-section">
+                        <h2>Disponibles</h2>
+                        <div class="wallet-row">
+                            <span class="label">Like Disponible:</span>
+                            <span class="value" id="likes-disponibles">0</span>
+                        </div>
+                    </div>
+                    <hr class="separator">
+                    <div class="wallet-section ganancias">
+                        <h2>Ganancias</h2>
+                         <div class="wallet-row">
+                            <span class="label">Like Ganados:</span>
+                            <span class="value" id="likes-ganados">0</span>
+                        </div>
+                        <div class="wallet-row">
+                            <span class="label">Dinero Generado:</span>
+                            <span class="value" id="dinero-ganado">$0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary">Retirar</button>
+                    <button class="btn-secondary" id="buy-button">Comprar</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // NUEVO: Función para formatear el número como moneda
+        function formatCurrency(value) {
+            // Si el valor no es válido o es 0, retorna "$ 0"
+            if (!value || isNaN(value)) {
+                return '$ 0';
+            }
+            // Elimina cualquier caracter que no sea un dígito
+            const numberString = String(value).replace(/\D/g, '');
+            // Formatea el número con puntos como separadores de miles
+            const formattedNumber = numberString.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            // Devuelve el string final con el símbolo de peso
+            return `$ ${formattedNumber}`;
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+            if (loggedInUser && loggedInUser.plan) {
+                const plan = loggedInUser.plan;
+                
+                // Aplicar el tema de color
+                document.querySelector('.app-screen').classList.add(`plan-${plan}`);
+                
+                // Actualizar el nombre del plan
+                const planNameElement = document.getElementById('plan-name');
+                planNameElement.textContent = `Plan ${plan.charAt(0).toUpperCase() + plan.slice(1)}`;
+                
+                // Actualizar datos de la billetera
+                document.getElementById('likes-disponibles').textContent = loggedInUser.likesDisponibles || '0';
+                document.getElementById('likes-ganados').textContent = loggedInUser.likesGanados || '0';
+
+                // USAMOS LA NUEVA FUNCIÓN para formatear el valor
+                const dineroValue = loggedInUser.dineroGanado || '0';
+                document.getElementById('dinero-ganado').textContent = formatCurrency(dineroValue);
+
+            } else {
+                // Si no hay datos de sesión, volver al login
+                window.location.href = 'index.html';
+            }
+        });
+        
+        // La lógica para el panel de compra no necesita cambios
+        const buyButton = document.getElementById('buy-button');
+        // ...resto del script del panel de compra sin cambios...
+    </script>
+
+</body>
+</html>

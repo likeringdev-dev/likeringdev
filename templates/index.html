@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a Likering</title>
+    
+    <link rel="manifest" href="manifest.json">
+    
+    <meta name="theme-color" content="#00A4E6">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/FKgZRLrW/image.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        :root {
+            --likering-pink: #F92B75;
+            --likering-blue: #00A4E6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a1a1a;
+        }
+
+        .app-screen {
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .background-slideshow, .overlay, .splash-screen, .main-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .background-slideshow { z-index: 1; }
+        .overlay { background: rgba(0, 0, 0, 0.4); z-index: 2; }
+        .splash-screen { z-index: 100; }
+        .main-content { z-index: 3; }
+
+        .background-slideshow div {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            animation: image-fade 24s infinite;
+        }
+
+        .background-slideshow div:nth-child(1) { background-image: url('https://images.pexels.com/photos/1535244/pexels-photo-1535244.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); animation-delay: 0s; }
+        .background-slideshow div:nth-child(2) { background-image: url('https://images.pexels.com/photos/1799042/pexels-photo-1799042.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); animation-delay: 6s; }
+        .background-slideshow div:nth-child(3) { background-image: url('https://images.pexels.com/photos/2787216/pexels-photo-2787216.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); animation-delay: 12s; }
+        .background-slideshow div:nth-child(4) { background-image: url('https://images.pexels.com/photos/2883049/pexels-photo-2883049.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); animation-delay: 18s; }
+
+        @keyframes image-fade {
+            0% { opacity: 0; }
+            8% { opacity: 1; transform: scale(1.05); }
+            25% { opacity: 1; transform: scale(1.05); }
+            33% { opacity: 0; transform: scale(1.1); }
+            100% { opacity: 0; }
+        }
+
+        .splash-screen {
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease-out;
+        }
+        
+        .splash-screen .logo {
+            width: 140px;
+            animation: logo-pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes logo-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .splash-footer {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+
+        .splash-footer img {
+            width: 150px;
+            opacity: 0.8;
+        }
+
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease-in, visibility 0s 1s;
+        }
+
+        .main-content.active {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 1s ease-in;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px 25px;
+            background: rgba(18, 18, 18, 0.5); 
+            border-radius: 20px;
+            border: 1px solid rgba(0, 164, 230, 0.2); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            text-align: center;
+            color: #fff;
+        }
+        
+        .form-container.shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+            20%, 40%, 60%, 80% { transform: translateX(6px); }
+        }
+
+        .form-container .logo {
+            width: 70px; 
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .form-container h2 {
+            font-weight: 600;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 14px 14px 45px;
+            background: rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            box-shadow: 0 0 15px rgba(0, 164, 230, 0.5);
+            border-color: rgba(0, 164, 230, 0.8);
+        }
+
+        .input-group input::placeholder { color: rgba(255, 255, 255, 0.7); }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            margin-bottom: 25px;
+        }
+        
+        .actions a {
+            color: var(--likering-blue);
+            text-decoration: none;
+        }
+        
+        .form-button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background-image: linear-gradient(45deg, var(--likering-pink), var(--likering-blue));
+            background-size: 200%;
+            background-position: left;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: background-position 0.4s ease;
+        }
+
+        .form-button:hover {
+            background-position: right;
+        }
+
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed #ccc;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            color: #ccc;
+            font-size: 2rem;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .switch-form-link {
+            color: var(--likering-blue);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        #register-form {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-screen">
+        <div class="background-slideshow">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="overlay"></div>
+
+        <div class="splash-screen">
+            <img src="https://i.postimg.cc/FKgZRLrW/image.png" alt="App Logo" class="logo">
+            <div class="splash-footer">
+                <img src="https://i.postimg.cc/9X6HZ6P6/image.png" alt="From Likering">
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="login-form-wrapper"> 
+                <div class="form-container" id="login-form">
+                    <img src="https://i.postimg.cc/PJm3mRTH/image.png" alt="App Logo" class="logo">
+                    <h2>Bienvenido a Likering</h2>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="login-username" placeholder="Email o usuario">
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="login-password" placeholder="Contraseña">
+                    </div>
+                    <div class="actions">
+                        <label>
+                            <input type="checkbox" id="remember-me"> Recordarme
+                        </label>
+                        <a href="#">¿Olvidaste tu contraseña?</a>
+                    </div>
+                    <button class="form-button" id="login-btn">Iniciar Sesión</button>
+                    <a class="switch-form-link" id="show-register">¿No tienes cuenta? Regístrate</a>
+                </div>
+
+                <div class="form-container" id="register-form">
+                    <div class="image-preview" id="image-preview">
+                        <span>+</span>
+                    </div>
+                    <h2>Crear Cuenta</h2>
+                    <input type="file" id="image-upload" accept="image/*" capture="camera" style="display: none;">
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="register-username" placeholder="Nombre de usuario">
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="register-password" placeholder="Contraseña">
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="register-password-confirm" placeholder="Confirmar contraseña">
+                    </div>
+                    <button class="form-button" id="register-btn">Registrarse</button>
+                    <a class="switch-form-link" id="show-login">¿Ya tienes cuenta? Inicia Sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- URL de tu Web App de Google Apps Script ---
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzl-Bh6ZY2eiEn_Hv6eHu4Av2STOp0hWVcCQpfBOElOZggrWtVpLcFLCXqBASgJuaU7A/exec";
+        
+        // --- URL de tu API Key de ImgBB ---
+        const IMGBB_API_KEY = "df01bb05ce03159d54c33e1e22eba2cf";
+
+        window.addEventListener('load', async () => { // Changed to async to support silent login check
+            const splashScreen = document.querySelector('.splash-screen');
+            const mainContent = document.querySelector('.main-content');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const showRegisterLink = document.getElementById('show-register');
+            const showLoginLink = document.getElementById('show-login');
+            const loginUsernameInput = document.getElementById('login-username');
+            const loginPasswordInput = document.getElementById('login-password');
+            const rememberMeCheckbox = document.getElementById('remember-me');
+
+            // --- Attempt Silent Login if "Remember Me" is checked ---
+            const rememberedUser = JSON.parse(localStorage.getItem('rememberedUser'));
+            if (rememberedUser && rememberedUser.username && rememberedUser.password) {
+                loginUsernameInput.value = rememberedUser.username;
+                loginPasswordInput.value = rememberedUser.password;
+                rememberMeCheckbox.checked = true;
+
+                // Attempt immediate login
+                const loginSuccessful = await attemptLogin(rememberedUser.username, rememberedUser.password);
+                if (loginSuccessful) {
+                    // Skip splash screen transition and go directly to videos
+                    window.location.href = 'Videos.html';
+                    return; // Prevent further execution of splash screen logic
+                } else {
+                    // If silent login fails, clear remembered user (credentials might be old/invalid)
+                    localStorage.removeItem('rememberedUser');
+                    rememberMeCheckbox.checked = false; // Uncheck it
+                }
+            }
+
+            // --- Splash Screen and Form Transition (only if not redirected) ---
+            setTimeout(() => {
+                splashScreen.classList.add('hidden');
+                setTimeout(() => {
+                    mainContent.classList.add('active');
+                }, 500);
+            }, 3000);
+
+            // --- Form Switching ---
+            showRegisterLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            });
+
+            showLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                registerForm.style.display = 'none';
+                loginForm.style.display = 'block';
+            });
+
+            // --- Login Function ---
+            async function attemptLogin(username, password) {
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'login', username: username, password: password }),
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8',
+                        },
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        localStorage.setItem('loggedInUser', JSON.stringify(result.data));
+                        return true; // Login successful
+                    } else {
+                        // Display message if it's not a silent login attempt
+                        if (!rememberedUser) { // Only show alert if user manually tried to log in
+                            alert(result.message);
+                            loginForm.classList.add('shake');
+                            loginPasswordInput.value = ''; // Clear password on failed attempt
+                            setTimeout(() => loginForm.classList.remove('shake'), 500);
+                        }
+                        return false; // Login failed
+                    }
+                } catch (error) {
+                    console.error('Error al verificar el usuario:', error);
+                    // Display alert only if it's not a silent login attempt
+                    if (!rememberedUser) {
+                        alert('No se pudo verificar el usuario. Revisa la consola para más detalles.');
+                    }
+                    return false; // Login failed due to error
+                }
+            }
+
+            // --- LÓGICA DE LOGIN CON APPS SCRIPT (CORREGIDA) ---
+            const loginBtn = document.getElementById('login-btn');
+            loginBtn.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const username = loginUsernameInput.value;
+                const password = loginPasswordInput.value;
+
+                if (!username || !password) {
+                    alert('Por favor, ingresa usuario y contraseña.');
+                    return;
+                }
+
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Ingresando...';
+
+                const loginSuccessful = await attemptLogin(username, password);
+
+                if (loginSuccessful) {
+                    if (rememberMeCheckbox.checked) {
+                        // Save credentials if "Remember Me" is checked
+                        localStorage.setItem('rememberedUser', JSON.stringify({ username: username, password: password }));
+                    } else {
+                        // Clear credentials if "Remember Me" is unchecked
+                        localStorage.removeItem('rememberedUser');
+                    }
+                    window.location.href = 'Videos.html';
+                } else {
+                    // Handled by attemptLogin, just re-enable button
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Iniciar Sesión';
+                }
+            });
+
+            // --- Registration Logic ---
+            const registerBtn = document.getElementById('register-btn');
+            const imageUpload = document.getElementById('image-upload');
+            const imagePreview = document.getElementById('image-preview');
+
+            imagePreview.addEventListener('click', () => imageUpload.click());
+
+            imageUpload.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.innerHTML = `<img src="${e.target.result}" alt="Image Preview">`;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            registerBtn.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const username = document.getElementById('register-username').value;
+                const password = document.getElementById('register-password').value;
+                const passwordConfirm = document.getElementById('register-password-confirm').value;
+                const imageFile = imageUpload.files[0];
+
+                if (!username || !password || !passwordConfirm || !imageFile) {
+                    alert('Por favor, completa todos los campos.');
+                    return;
+                }
+                if (password !== passwordConfirm) {
+                    alert('Las contraseñas no coinciden.');
+                    return;
+                }
+
+                registerBtn.disabled = true;
+                registerBtn.textContent = 'Registrando...';
+
+                const formData = new FormData();
+                formData.append('image', imageFile);
+
+                try {
+                    const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const imgbbData = await imgbbResponse.json();
+                    if (!imgbbData.success) {
+                        throw new Error('Error al subir la imagen: ' + imgbbData.error.message);
+                    }
+                    const imageUrl = imgbbData.data.url;
+
+                    // Updated to use POST for registration as well for consistency and to avoid URL length limits
+                    const scriptResponse = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'register', username: username, password: password, imageUrl: imageUrl }),
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8',
+                        },
+                    });
+                    const scriptData = await scriptResponse.json(); // Expect JSON response
+
+                    alert(scriptData.message); // Show message from backend
+                    
+                    if (scriptData.success) { // Check for success boolean
+                        localStorage.setItem('loggedInUser', JSON.stringify({
+                            username: username,
+                            imageUrl: imageUrl,
+                            plan: 'azul',
+                            likes: '0', followers: '0', following: '0',
+                            likesDisponibles: '0', likesGanados: '0', dineroGanado: '$0'
+                        }));
+                        window.location.href = 'Videos.html';
+                    }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Hubo un error al registrar el usuario.');
+                } finally {
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = 'Registrarse';
+                }
+            });
+        });
+
+        // --- Service Worker ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

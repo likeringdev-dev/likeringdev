@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Likering Videos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    
+    body {
+        background-color: #000;
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        overflow: hidden;
+    }
+
+    .tiktok-app {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-color: #000;
+        position: relative;
+    }
+
+    .video-container{
+        flex-grow:1;
+        position:relative;
+        overflow:hidden;
+        background-color:#000;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        touch-action: pan-y;
+    }
+
+
+    .comment-item {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        position: relative;
+        padding: 8px;
+        border-radius: 12px;
+        transition: background-color 0.3s ease;
+    }
+
+    .comment-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .comment-message {
+        background: #2c2c2c;
+        padding: 12px 16px;
+        border-radius: 18px;
+        border-bottom-left-radius: 6px;
+        word-wrap: break-word;
+        word-break: break-word;
+        max-width: 100%;
+        position: relative;
+    }
+
+    .comment-message.editing {
+        background: #3a3a3a;
+        border: 2px solid var(--plan-color-principal, #fe2c55);
+    }
+
+    .comment-edit-input {
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        width: 100%;
+        resize: none;
+        outline: none;
+        min-height: 20px;
+    }
+
+    .comment-edit-input::placeholder {
+        color: #888;
+    }
+
+    .comment-options {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        gap: 5px;
+    }
+
+    .comment-item:hover .comment-options {
+        opacity: 1;
+    }
+
+    .comment-option-btn {
+        background: rgba(0, 0, 0, 0.7);
+        border: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        color: white;
+        font-size: 0.7rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .comment-option-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .comment-option-btn.edit {
+        background: #ffa500;
+    }
+
+    .comment-option-btn.delete {
+        background: #ff4757;
+    }
+
+    .comment-option-btn:disabled {
+        background: #666;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+    .comment-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 5px;
+        font-size: 0.65rem;
+        opacity: 0.7;
+    }
+
+    .comment-time {
+        color: #888;
+    }
+
+    .comment-edited {
+        color: #ffa500;
+        font-style: italic;
+    }
+
+    .edit-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+        justify-content: flex-end;
+    }
+
+    .edit-btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .edit-btn.save {
+        background: #28a745;
+        color: white;
+    }
+
+    .edit-btn.cancel {
+        background: #666;
+        color: white;
+    }
+
+    .edit-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .edit-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+
+
+
+
+    /* Modal de eliminación de comentario */
+    .comment-delete-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .comment-delete-modal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .comment-delete-modal .modal-container {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 400px;
+        padding: 25px;
+        text-align: center;
+        color: white;
+        transform: scale(0.9) translateY(20px);
+        transition: transform 0.3s ease;
+    }
+
+    .comment-delete-modal.show .modal-container {
+        transform: scale(1) translateY(0);
+    }
+
+    .comment-delete-modal h3 {
+        margin: 0 0 15px 0;
+        font-size: 1.2rem;
+        color: #ff4757;
+    }
+
+    .comment-delete-modal p {
+        margin: 0 0 20px 0;
+        color: #ccc;
+    }
+
+    .comment-delete-modal .modal-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+
+    .comment-delete-modal button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .comment-delete-modal .cancel-btn {
+        background: #666;
+        color: white;
+    }
+
+    .comment-delete-modal .delete-btn {
+        background: #ff4757;
+        color: white;
+    }
+
+    .comment-delete-modal button:hover {
+        transform: translateY(-2px);
+    }
+
+    .comment-delete-modal button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .floating-menu li#logout-btn {
+        border-top: 1px solid #ddd;
+        margin-top: 8px;
+        padding-top: 12px;
+        color: #dc3545;
+    }
+
+    .floating-menu li#logout-btn:hover {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+
+    .floating-menu li#logout-btn i {
+        color: #dc3545;
+    }
+
+    .video-wrapper{
+        position:absolute;
+        width:100%;
+        height:100%;
+        color:#fff;
+        transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        cursor:pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+
+    .follow-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(3px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .follow-modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .follow-modal-container {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        color: white;
+        max-width: 300px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        transform: scale(0.8) translateY(30px);
+        transition: transform 0.3s ease;
+    }
+
+    .follow-modal-overlay.show .follow-modal-container {
+        transform: scale(1) translateY(0);
+    }
+
+    .follow-success-icon {
+        font-size: 3rem;
+        color: #28a745;
+        margin-bottom: 15px;
+        animation: successPulse 0.6s ease;
+    }
+
+    @keyframes successPulse {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    .follow-modal-container h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.4rem;
+        font-weight: 600;
+    }
+
+    .follow-modal-container p {
+        margin: 0;
+        font-size: 1rem;
+        color: #ccc;
+        line-height: 1.4;
+    }
+
+    /* ==== NUEVO: ESTILOS PARA MODAL DE CONFIRMACIÓN DE SEGUIR ==== */
+    .follow-confirm-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .follow-confirm-modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .follow-confirm-modal-container {
+        background: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        color: white;
+        max-width: 320px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+    }
+
+    .follow-confirm-modal-overlay.show .follow-confirm-modal-container {
+        transform: scale(1);
+    }
+
+    .follow-confirm-modal-container h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+     .follow-confirm-modal-container h3 span {
+        color: #fe2c55; 
+     }
+
+    .follow-confirm-modal-container p {
+        margin: 0 0 25px 0;
+        font-size: 0.9rem;
+        color: #ccc;
+        line-height: 1.4;
+    }
+
+    /* Slider Styles */
+    .slider-container {
+        width: 100%;
+        padding: 0;
+        box-sizing: border-box;
+        margin-bottom: 25px;
+        user-select: none;
+    }
+
+    .slider-track {
+        position: relative;
+        width: 100%;
+        height: 50px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .slider-thumb {
+        position: absolute;
+        left: 4px;
+        top: 4px;
+        width: 42px;
+        height: 42px;
+        background-color: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fe2c55;
+        font-size: 1.2rem;
+        cursor: grab;
+        z-index: 2;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .slider-thumb:active {
+        cursor: grabbing;
+        transform: scale(1.05);
+    }
+
+    .slider-text {
+        color: #aaa;
+        font-weight: 500;
+        font-size: 0.9rem;
+        z-index: 1;
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .cancel-follow-btn {
+        background: transparent;
+        border: none;
+        color: #888;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 8px 16px;
+        transition: color 0.2s;
+        font-size: 0.9rem;
+    }
+
+    .cancel-follow-btn:hover {
+        color: #fff;
+    }
+     /* ==== FIN DE NUEVOS ESTILOS ==== */
+
+
+    /* Responsive */
+    @media (max-width: 480px) {
+        .follow-modal-container {
+            padding: 25px 20px;
+            max-width: 280px;
+        }
+        
+        .follow-success-icon {
+            font-size: 2.5rem;
+        }
+        
+        .follow-modal-container h3 {
+            font-size: 1.2rem;
+        }
+        
+        .follow-modal-container p {
+            font-size: 0.9rem;
+        }
+    }
+
+
+    .play-indicator {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px;
+        height: 80px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+        border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .play-indicator:hover {
+        background: rgba(0, 0, 0, 0.8);
+        transform: translate(-50%, -50%) scale(1.1);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .play-indicator i {
+        margin-left: 3px; /* Centrar visualmente el ícono de play */
+    }
+
+    /* Animación para el indicador */
+    @keyframes playPulse {
+        0%, 100% {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        50% {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+    }
+
+    .play-indicator {
+        animation: playPulse 2s infinite ease-in-out;
+    }
+
+    /* Responsive para móviles */
+    @media (max-width: 480px) {
+        .play-indicator {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+    }
+
+
+    /* Responsive */
+    @media (max-width: 480px) {
+        .follow-modal-container {
+            padding: 25px 20px;
+            max-width: 280px;
+        }
+        
+        .follow-success-icon {
+            font-size: 2.5rem;
+        }
+        
+        .follow-modal-container h3 {
+            font-size: 1.2rem;
+        }
+        
+        .follow-modal-container p {
+            font-size: 0.9rem;
+        }
+    }
+
+
+
+    .video-player{
+        position:absolute;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        z-index:1;
+    }
+    .video-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to bottom,rgba(0,0,0,.5) 0,rgba(0,0,0,0) 30%,rgba(0,0,0,0) 70%,rgba(0,0,0,.5) 100%);z-index:2;pointer-events:none}
+    .top-left-info{position:absolute;top:40px;left:20px;right:50px;z-index:3;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+    .top-left-info h3,.top-left-info .description,.top-left-info .music-info{pointer-events:auto}
+    .top-left-info h3{margin:0;font-size:1em;font-weight:700;text-shadow:1px 1px 2px rgba(0,0,0,.7)}
+    .top-left-info .description{font-size:.85em;line-height:1.4;margin:0}
+    .top-left-info .music-info{display:flex;align-items:center;font-size:.8em;font-weight:600}
+    .music-info i{margin-right:8px}
+    .bottom-left-actions{position:absolute;bottom:20px;left:20px;z-index:4;display:flex;align-items:flex-end;color:#fff;gap:20px;pointer-events:none}
+    .bottom-left-actions > div{pointer-events:auto}
+    .profile-picture-container{position:relative}
+    .profile-picture{width:45px;height:45px;border-radius:8px;background-size:cover;border:2px solid #fff;box-shadow:0 0 5px rgba(0,0,0,.5);cursor:pointer}
+    .follow-button{position:absolute;bottom:-8px;right:-8px;width:20px;height:20px;background-color:#fe2c55;border-radius:4px;display:flex;justify-content:center;align-items:center;color:#fff;font-size:16px;line-height:20px;font-weight:700;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.3);transition:opacity .3s ease,transform .3s ease}
+    .interaction-area{display:flex;flex-direction:column;align-items:center;justify-content:center;height:45px;box-sizing:border-box}
+    .interaction-area .icon{font-size:1.8em;cursor:pointer;color:#fff;transition:color .2s ease-in-out,transform .2s ease,text-shadow .2s ease;text-shadow:0 0 5px rgba(0,0,0,.5);margin-bottom:2px}
+    .interaction-area .icon.liked{color:#fe2c55;transform:scale(1.1);text-shadow:0 0 12px #fe2c55}
+    .interaction-area .count{font-size:.8em;font-weight:600}
+    .my-profile-badge{position:absolute;right:20px;bottom:20px;z-index:51;width:45px;height:45px;border-radius:8px;cursor:pointer;overflow:hidden}
+    .my-profile-picture{width:100%;height:100%;background-size:cover;border:2px solid #fff;box-shadow:0 0 5px rgba(0,0,0,.5);border-radius:8px;box-sizing:border-box;transition:filter .3s ease}
+    .my-profile-badge:hover .my-profile-picture{filter:brightness(.6)}
+    .my-profile-badge:hover span{opacity:1}
+    .options-icon{position:absolute;top:45px;right:15px;font-size:1.5em;color:#fff;z-index:3;cursor:pointer;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+    .floating-menu-container,.options-menu-container,.comments-panel-container,.share-menu-container{position:absolute;top:0;left:0;width:100%;height:100%;z-index:50;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility 0s .3s}
+    .floating-menu-container.active,.options-menu-container.active,.comments-panel-container.active,.share-menu-container.active{opacity:1;visibility:visible;transition:opacity .3s ease}
+    .floating-menu-container,.options-menu-container,.share-menu-container{background-color:rgba(0,0,0,.4)}
+    .options-menu-container,.share-menu-container{z-index:60;background:transparent}
+    .floating-menu,.options-menu{position:absolute;width:180px;background-color:#f0f0f0;color:#111;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.2);opacity:0;transition:transform .3s ease,opacity .3s ease}
+    .floating-menu{bottom:80px;right:15px;transform:translateY(15px)}
+    .options-menu{top:75px;right:15px;transform:translateY(-15px)}
+    .floating-menu-container.active .floating-menu,.options-menu-container.active .options-menu{transform:translateY(0);opacity:1}
+    .floating-menu::after,.options-menu::before{content:'';position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent}
+    .floating-menu::after{bottom:-8px;right:24px;border-top:8px solid #f0f0f0}
+    .options-menu::before{top:-8px;right:12px;border-bottom:8px solid #f0f0f0}
+    .floating-menu ul,.options-menu ul{list-style:none;margin:0;padding:8px}
+    .floating-menu li,.options-menu li{display:flex;align-items:center;padding:12px 15px;cursor:pointer;font-size:.9em;font-weight:600;border-radius:8px;transition:background-color .2s ease}
+    .floating-menu li:hover,.options-menu li:hover{background-color:#ddd}
+    .floating-menu li i,.options-menu li i{width:25px;margin-right:12px;text-align:center;font-size:1.1em}
+    .floating-menu a{text-decoration:none;color:inherit;display:flex;align-items:center;width:100%}
+    .comments-panel-container{z-index:70}
+    .comments-panel{position:absolute;bottom:0;left:0;width:100%;background-color:#181818;border-top-left-radius:16px;border-top-right-radius:16px;transform:translateY(100%);display:flex;flex-direction:column;color:#fff;height:65%;transition:transform .4s ease-out}
+    .comments-panel-container.active .comments-panel{transform:translateY(0)}
+    .comments-header{text-align:center;padding:15px;border-bottom:1px solid #333;position:relative;flex-shrink:0}
+    .comments-header h4{font-weight:600}
+    .close-comments{position:absolute;top:50%;right:15px;transform:translateY(-50%);font-size:1.2rem;color:#888;cursor:pointer}
+    .comments-list{flex-grow:1;overflow-y:auto;padding:15px;scrollbar-width:none;-ms-overflow-style:none}
+    .comments-list::-webkit-scrollbar{display:none}
+    .comment-item{display:flex;gap:12px;margin-bottom:20px}
+    .comment-avatar{width:40px;height:40px;border-radius:8px;background-size:cover;flex-shrink:0}
+    .comment-body{flex-grow:1}
+    .comment-user{font-weight:700;font-size:.9rem;margin-bottom:4px}
+    .comment-text{font-size:.85rem;line-height:1.4}
+    .add-comment-area{display:flex;align-items:center;gap:10px;padding:10px 15px;border-top:1px solid #333;background-color:#181818;flex-shrink:0}
+    .my-avatar-comment{width:35px;height:35px;border-radius:8px;background-size:cover;background-position:center;flex-shrink:0}
+    .add-comment-area input{flex-grow:1;padding:12px 15px;border:none;background-color:#2c2c2c;border-radius:20px;color:#fff;outline:none}
+    .add-comment-area input::placeholder{color:#888}
+    .add-comment-area .send-comment-btn{background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;padding:5px}
+    .share-panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}
+    .share-panel-header h4{margin:0;font-weight:600;font-size:1.1em}
+    .share-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:20px}
+    .share-option{display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer}
+    .share-icon{width:65px;height:65px;border-radius:12px;display:flex;justify-content:center;align-items:center;font-size:2em;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:transform .2s ease-out,box-shadow .2s ease-out}
+    .share-icon:hover{transform:translateY(-5px) scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,.4)}
+    .share-icon.whatsapp{background:linear-gradient(135deg,#25d366,#128c7e)}
+    .share-icon.instagram{background:radial-gradient(circle at 30% 107%,#fdf497 0,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285aeb 90%)}
+    .share-icon.copy-link{background:linear-gradient(135deg,#6c757d,#343a40)}
+    .share-option span{font-size:.8em;font-weight:500;color:#ccc}
+    .download-progress-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,.7);z-index:999;display:flex;justify-content:center;align-items:center;opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s}
+    .download-progress-overlay.active{opacity:1;visibility:visible;transition:opacity .3s}
+    .download-progress-box{background-color:#282828;color:#fff;padding:20px 30px;border-radius:12px;text-align:center;font-weight:600}
+    .download-progress-box i{font-size:1.5em;margin-right:10px}
+    .loading-spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+        z-index: 10;
+    }
+    .loading-spinner img {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 10px;
+    }
+    .loading-spinner p {
+        font-size: 1.2em;
+        font-weight: 600;
+    }
+    .volume-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3em;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.4);padding:15px;border-radius:50%;z-index:5;opacity:0;transition:opacity .3s ease-out;pointer-events:auto;}
+    .volume-indicator.show{opacity:1}
+    
+    /* Alinea tu avatar al mismo nivel que el del streamer */
+    .my-profile-badge {
+      bottom: 22px !important;
+    }
+/* REEMPLAZA ESTE BLOQUE COMPLETO EN TU CSS */
+    @media (max-width: 480px) {
+        .bottom-left-actions {
+            left: 15px;
+            /* MODIFICADO: Aumentamos el valor para subir los iconos */
+            bottom: 20px; 
+            gap: 15px;
+        }
+
+
+        .top-left-info {
+            top: 10px;
+            left: 15px;
+        }
+        .my-profile-badge {
+            /* MODIFICADO: Aumentamos el valor para que se alinee con los otros iconos */
+            bottom: 95px; 
+            right: 10px;
+        }
+        .options-icon {
+            top: 10px;
+        }
+    }
+</style>
+</head>
+<body>
+    <div class="tiktok-app">
+        <div class="video-container">
+            <div class="loading-spinner" id="loading-spinner">
+                <img src="https://i.postimg.cc/PJm3mRTH/image.png" alt="Likering Logo">
+                <p>Cargando...</p>
+            </div>
+        </div>
+
+
+        <div class="follow-modal-overlay" id="follow-modal">
+            <div class="follow-modal-container">
+                <div class="follow-modal-content">
+                    <div class="follow-success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>¡Listo!</h3>
+                    <p id="follow-message">Ahora sigues a este canal</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="follow-confirm-modal-overlay" id="follow-confirm-modal">
+            <div class="follow-confirm-modal-container">
+                <h3>¿Quieres seguir a <span id="follow-confirm-username"></span>?</h3>
+                <p>Para confirmar, desliza el círculo hacia la derecha.</p>
+                <div class="slider-container" id="follow-slider-container">
+                    <div class="slider-track">
+                        <div class="slider-thumb" id="follow-slider-thumb">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <span class="slider-text">Desliza para seguir</span>
+                    </div>
+                </div>
+                <button class="cancel-follow-btn" id="cancel-follow-btn">Cancelar</button>
+            </div>
+        </div>
+        
+        <div class="my-profile-badge"><div class="my-profile-picture"></div><span>Yo</span></div>
+        <div class="floating-menu-container"><div class="floating-menu"><ul><li><a href="Billetera.html"><i class="fas fa-wallet"></i><span>Billetera</span></a></li><li><a href="Mensajes.html"><i class="far fa-comments"></i><span>Mensajes</span></a></li><li><a href="Perfil.html"><i class="fas fa-user-circle"></i><span>Perfil</span></a></li><li id="logout-btn"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></li></ul></div></div>
+        <div class="options-menu-container"><div class="options-menu"><ul><li id="share-btn"><i class="fas fa-share-square"></i><span>Compartir</span></li><li id="download-btn"><i class="fas fa-download"></i><span>Descargar</span></li></ul></div></div>
+        <div class="comments-panel-container"><div class="comments-panel"><div class="comments-header"><h4 id="comments-count">0 comentarios</h4><i class="fas fa-times close-comments"></i></div><div class="comments-list" id="comments-list"></div><div class="add-comment-area"><div class="my-avatar-comment"></div><input type="text" id="comment-input" placeholder="Añadir un comentario..."><button class="send-comment-btn" id="send-comment-btn"><i class="fas fa-arrow-right"></i></button></div></div></div>
+        <div class="share-menu-container"><div class="share-panel"><div class="share-panel-header"><h4>Compartir en</h4><i class="fas fa-times close-share"></i></div><div class="share-grid"><div class="share-option"><div class="share-icon whatsapp"><i class="fab fa-whatsapp"></i></div><span>WhatsApp</span></div><div class="share-option"><div class="share-icon instagram"><i class="fab fa-instagram"></i></div><span>Instagram</span></div><div class="share-option"><div class="share-icon copy-link"><i class="fas fa-link"></i></div><span>Copiar enlace</span></div></div></div></div>
+        <div class="download-progress-overlay"><div class="download-progress-box"><span id="download-status"></span></div></div>
+    </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const videoContainer = document.querySelector('.video-container');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const commentsList = document.getElementById('comments-list');
+        const commentsCountHeader = document.getElementById('comments-count');
+
+        let allVideosMasterList = [];
+        let videosToPlayQueue = [];
+        let loadedVideoElements = [];
+        let currentVideoIndex = 0;
+        let loggedInUser = null;
+
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyck3vesbAdynXl5OJdua80iQo1Ju6fHZaYd_mslNmCbrcw4nx1RVc2xEQQHsy3Lt0kDg/exec';
+
+        // ––––– Selección de elementos del DOM –––––
+        const commentsPanelContainer = document.querySelector('.comments-panel-container'); 
+        const closeCommentsBtn       = document.querySelector('.close-comments');         // :contentReference[oaicite:4]{index=3}
+        const commentInput           = document.querySelector('.add-comment-area input');
+        const sendCommentBtn         = document.querySelector('.add-comment-area .send-comment-btn');
+
+        // ==== NUEVO: Variables para el modal de confirmación ====
+        let targetUserToFollow = null;
+        const followConfirmModal = document.getElementById('follow-confirm-modal');
+        const sliderThumb = document.getElementById('follow-slider-thumb');
+        const sliderContainer = document.getElementById('follow-slider-container');
+        const cancelFollowBtn = document.getElementById('cancel-follow-btn');
+        const followConfirmUsernameSpan = document.getElementById('follow-confirm-username');
+        let isSliding = false;
+        let startX = 0;
+        let initialThumbX = 0;
+
+
+        // ––––– Cerrar panel de comentarios –––––
+        closeCommentsBtn.addEventListener('click', () => {
+          commentsPanelContainer.classList.remove('active');
+        });
+
+        // ––––– Enviar comentario –––––
+        sendCommentBtn.addEventListener('click', postComment);
+        commentInput.addEventListener('keypress', e => {
+          if (e.key === 'Enter') postComment();
+        });
+
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        async function fetchAllVideoMetadata() {
+            if (!loggedInUser) {
+                console.error("Usuario no logueado.");
+                return [];
+            }
+            try {
+                const params = new URLSearchParams({ action: 'getAllVideoData', user: loggedInUser.username });
+                const response = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+                if (!response.ok) throw new Error('Respuesta no válida del servidor.');
+                const result = await response.json();
+                if (!result.success) throw new Error(result.message || 'Error desconocido del backend.');
+                return result.data.map(video => ({ ...video, visualizaciones: parseInt(video.visualizaciones) || 0 }));
+            } catch (error) {
+                console.error("Error al cargar metadatos de videos:", error);
+                if (loadingSpinner) loadingSpinner.innerHTML = `<img src="https://i.postimg.cc/PJm3mRTH/image.png" alt="Likering Logo"><p>Error al cargar videos.</p>`;
+                return [];
+            }
+        }
+
+        async function loadComments(videoId) {
+            try {
+                const params = new URLSearchParams({ action: 'getComments', videoId: videoId });
+                const response = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+                const result = await response.json();
+                if (result.success) {
+                    displayComments(result.data);
+                } else { 
+                    throw new Error(result.message); 
+                }
+            } catch (error) {
+                commentsList.innerHTML = `<p style="text-align:center;color:red;">${error.message}</p>`;
+            }
+        }
+
+        function displayComments(comments) {
+            commentsList.innerHTML = '';
+            commentsCountHeader.textContent = `${comments.length} comentario${comments.length !== 1 ? 's' : ''}`;
+
+            if (comments.length === 0) {
+                commentsList.innerHTML = '<p style="text-align:center;color:#888;">Sé el primero en comentar.</p>';
+                return;
+            }
+
+            comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            comments.forEach(comment => {
+                const commentItem = document.createElement('div');
+                commentItem.className = 'comment-item';
+                commentItem.dataset.commentId = comment.commentId || '';
+
+                const timeAgo = getTimeAgo(new Date(comment.timestamp));
+
+                commentItem.innerHTML = `
+                    <div class="comment-avatar" style="background-image: url('${comment.imageUrl}')"></div>
+                    <div class="comment-body">
+                        <div class="comment-user">${comment.username}</div>
+                        <div class="comment-message">${comment.commentText}</div>
+                        <div class="comment-info">
+                            <span class="comment-time">${timeAgo}</span>
+                        </div>
+                    </div>
+                `;
+
+                commentsList.appendChild(commentItem);
+            });
+        }
+
+        function isWithinEditTime(timestamp) {
+            const now = new Date();
+            const diffMinutes = (now - timestamp) / (1000 * 60);
+            return diffMinutes <= 5;
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMinutes = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffMinutes < 1) return 'ahora';
+            if (diffMinutes < 60) return `${diffMinutes}min`;
+            if (diffHours < 24) return `${diffHours}h`;
+            return `${diffDays}d`;
+        }
+
+        function editComment(commentId) {
+          const commentItem    = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
+          const commentMessage = commentItem.querySelector('.comment-message');
+          const commentText    = commentMessage.querySelector('.comment-text');
+          const originalText   = commentMessage.dataset.originalText;
+          const editInput = document.createElement('textarea');
+          editInput.className    = 'comment-edit-input';
+          editInput.value        = originalText;
+          editInput.placeholder  = 'Edita tu comentario…';
+          editInput.style.width  = '100%';
+          editInput.style.boxSizing = 'border-box';
+          const editActions = document.createElement('div');
+          editActions.className = 'edit-actions';
+          editActions.innerHTML = `
+            <button class="edit-btn cancel" onclick="cancelEdit('${commentId}')">Cancelar</button>
+            <button class="edit-btn save"   onclick="saveEdit('${commentId}')">Guardar</button>
+          `;
+          commentText.style.display = 'none';
+          const opts = commentMessage.querySelector('.comment-options');
+          if (opts) opts.style.display = 'none';
+          commentMessage.classList.add('editing');
+          commentMessage.append(editInput, editActions);
+          editInput.focus();
+          editInput.select();
+        }
+
+        function cancelEdit(commentId) {
+            const commentItem = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
+            const commentMessage = commentItem.querySelector('.comment-message');
+            const commentText = commentMessage.querySelector('.comment-text');
+            const editInput = commentMessage.querySelector('.comment-edit-input');
+            const editActions = commentMessage.querySelector('.edit-actions');
+            editInput.remove();
+            editActions.remove();
+            commentText.style.display = 'block';
+            commentMessage.querySelector('.comment-options').style.display = 'flex';
+            commentMessage.classList.remove('editing');
+        }
+
+        async function saveEdit(commentId) {
+            const commentItem = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
+            const commentMessage = commentItem.querySelector('.comment-message');
+            const editInput = commentMessage.querySelector('.comment-edit-input');
+            const newText = editInput.value.trim();
+            
+            if (!newText || !commentId) {
+                alert('El comentario no puede estar vacío o no se pudo identificar.');
+                return;
+            }
+            
+            const saveBtn = commentMessage.querySelector('.edit-btn.save');
+            const cancelBtn = commentMessage.querySelector('.edit-btn.cancel');
+            saveBtn.disabled = true;
+            cancelBtn.disabled = true;
+            saveBtn.textContent = 'Guardando...';
+            
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'editComment',
+                        commentId: commentId,
+                        newText: newText,
+                        username: loggedInUser.username
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    commentMessage.dataset.originalText = newText;
+                    commentMessage.querySelector('.comment-text').textContent = newText;
+                    cancelEdit(commentId);
+                    const commentInfo = commentItem.querySelector('.comment-info');
+                    if (!commentInfo.querySelector('.comment-edited')) {
+                        commentInfo.innerHTML += ' <span class="comment-edited">• editado</span>';
+                    }
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                alert(`Error al editar comentario: ${error.message}`);
+            } finally {
+                saveBtn.disabled = false;
+                cancelBtn.disabled = false;
+                saveBtn.textContent = 'Guardar';
+            }
+        }
+
+        let currentCommentId = null;
+
+        function deleteComment(commentId) {
+            currentCommentId = commentId;
+            showDeleteModal(commentId);
+        }
+
+        function showDeleteModal(commentId) {
+          currentCommentId = commentId;
+          let modal = document.getElementById('comment-delete-modal');
+          if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'comment-delete-modal';
+                modal.className = 'comment-delete-modal';
+                modal.innerHTML = `
+                    <div class="modal-container">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Eliminar comentario</h3>
+                        <p>¿Estás seguro de que quieres eliminar este comentario?</p>
+                        <div class="modal-actions">
+                            <button class="cancel-btn" onclick="hideDeleteModal()">Cancelar</button>
+                            <button class="delete-btn" onclick="confirmDeleteComment()">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+          modal.classList.add('show');
+        }
+
+        function hideDeleteModal() {
+            const modal = document.getElementById('comment-delete-modal');
+            if (modal) modal.classList.remove('show');
+            currentCommentId = null;
+        }
+
+        async function confirmDeleteComment() {
+            if (!currentCommentId) return;
+            const modal = document.getElementById('comment-delete-modal');
+            const deleteBtn = modal.querySelector('.delete-btn');
+            const cancelBtn = modal.querySelector('.cancel-btn');
+            deleteBtn.disabled = true;
+            cancelBtn.disabled = true;
+            deleteBtn.textContent = 'Eliminando...';
+            
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'deleteComment',
+                        commentId: currentCommentId,
+                        username: loggedInUser.username
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    hideDeleteModal();
+                    const currentVideoData = loadedVideoElements[currentVideoIndex]?.videoData;
+                    if (currentVideoData?.videoId) {
+                        loadComments(currentVideoData.videoId);
+                        currentVideoData.comments = Math.max(0, (currentVideoData.comments || 1) - 1);
+                        const commentCountSpan = loadedVideoElements[currentVideoIndex].querySelector('.bottom-left-actions .interaction-area:nth-child(3) .count');
+                        if (commentCountSpan) commentCountSpan.textContent = currentVideoData.comments;
+                    }
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                alert(`Error al eliminar comentario: ${error.message}`);
+            } finally {
+                deleteBtn.disabled = false;
+                cancelBtn.disabled = false;
+                deleteBtn.textContent = 'Eliminar';
+            }
+        }
+
+
+        function saveCurrentVideoState() {
+            if (loadedVideoElements[currentVideoIndex]?.videoData?.videoId) {
+                localStorage.setItem('currentVideoId', loadedVideoElements[currentVideoIndex].videoData.videoId);
+                localStorage.setItem('currentVideoIndex', currentVideoIndex.toString());
+            }
+        }
+
+        async function restoreVideoState() {
+            const savedVideoId = localStorage.getItem('currentVideoId');
+            if (savedVideoId && allVideosMasterList.length > 0) {
+                const videoIndex = allVideosMasterList.findIndex(video => video.videoId === savedVideoId);
+                if (videoIndex !== -1) {
+                    const savedVideo = allVideosMasterList[videoIndex];
+                    videosToPlayQueue = [savedVideo, ...allVideosMasterList.filter(v => v.videoId !== savedVideoId)];
+                    console.log(`🔄 Restaurando video: ${savedVideo.videoId}`);
+                }
+            }
+        }
+
+        async function postComment() {
+            const commentText = commentInput.value.trim();
+            if (!commentText || !loggedInUser) return;
+            const currentVideoData = loadedVideoElements[currentVideoIndex]?.videoData;
+            if (!currentVideoData || !currentVideoData.videoId) return;
+            sendCommentBtn.disabled = true;
+            sendCommentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addComment', videoId: currentVideoData.videoId, username: loggedInUser.username, commentText: commentText })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    commentInput.value = '';
+                    currentVideoData.comments = (currentVideoData.comments || 0) + 1;
+                    const commentCountSpan = loadedVideoElements[currentVideoIndex].querySelector('.bottom-left-actions .interaction-area:nth-child(3) .count');
+                    if (commentCountSpan) commentCountSpan.textContent = currentVideoData.comments;
+                    await loadComments(currentVideoData.videoId);
+                } else { throw new Error(result.message); }
+            } catch (error) {
+                alert(`Error al enviar comentario: ${error.message}`);
+            } finally {
+                sendCommentBtn.disabled = false;
+                sendCommentBtn.innerHTML = '<i class="fas fa-arrow-right"></i>';
+            }
+        }
+
+        async function handleLikeClick(likeArea, videoId) {
+            const iconDiv = likeArea.querySelector('.icon');
+            if (iconDiv.classList.contains('liked')) return;
+            iconDiv.classList.add('liked');
+            const countSpan = likeArea.querySelector('.count');
+            let currentLikes = parseInt(countSpan.textContent) || 0;
+            countSpan.textContent = currentLikes + 1;
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'likeVideo', videoId: videoId, username: loggedInUser.username })
+                });
+            } catch (error) {
+                console.error("Error al registrar el like:", error);
+                iconDiv.classList.remove('liked');
+                countSpan.textContent = currentLikes;
+            }
+        }
+
+        async function recordView(videoId, username) {
+            const currentWrapper = loadedVideoElements[currentVideoIndex];
+            if (currentWrapper.videoData.user === `@${username}`) {
+                console.log("Vista propia, no contabilizada");
+                return;
+            }
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'recordView', videoId: videoId, username: username })
+                });
+                const result = await response.json();
+                if (result.success && result.newViewCount !== undefined) {
+                    const wrapper = loadedVideoElements[currentVideoIndex];
+                    if (wrapper.videoData.videoId === videoId) {
+                        const viewsCountSpan = wrapper.querySelector('.interaction-area:nth-child(4) .count');
+                        if (viewsCountSpan) {
+                            viewsCountSpan.textContent = result.newViewCount;
+                            wrapper.videoData.visualizaciones = result.newViewCount;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error al registrar visualización:", error);
+            }
+        }
+
+
+        function replenishVideoQueue() {
+            console.log("Cola de reproducción vacía. Rellenando y re-barajando...");
+            videosToPlayQueue = [...allVideosMasterList];
+            shuffleArray(videosToPlayQueue);
+            const currentVideo = loadedVideoElements[currentVideoIndex];
+            if (!currentVideo) return;
+            const currentVidId = currentVideo.videoData.videoId;
+            const prevVideo = loadedVideoElements[currentVideoIndex - 1];
+            const prevVidId = prevVideo ? prevVideo.videoData.videoId : null;
+            if (videosToPlayQueue.length > 1 && (videosToPlayQueue[0].videoId === currentVidId || videosToPlayQueue[0].videoId === prevVidId)) {
+                videosToPlayQueue.push(videosToPlayQueue.shift());
+            }
+        }
+
+         function createVideoElement(videoData) {
+            const videoWrapper = document.createElement('div');
+            videoWrapper.className = 'video-wrapper';
+            videoWrapper.videoData = videoData;
+            videoWrapper.userInteracted = false;
+            
+            const videoPlayer = document.createElement('video');
+            videoPlayer.className = 'video-player';
+            videoPlayer.src = videoData.videoUrl;
+            videoPlayer.poster = videoData.thumbnailUrl;
+            videoPlayer.loop = true;
+            videoPlayer.playsInline = true;
+            videoPlayer.muted = false;
+            videoPlayer.preload = 'auto';
+            videoPlayer.viewCounted = false;
+            
+            videoPlayer.addEventListener('timeupdate', () => {
+                if (!loggedInUser || videoPlayer.viewCounted || isNaN(videoPlayer.duration) || loadedVideoElements[currentVideoIndex]?.querySelector('video') !== videoPlayer) {
+                    return;
+                }
+                const percentageWatched = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+                if (percentageWatched > 70) {
+                    recordView(videoData.videoId, loggedInUser.username);
+                    videoPlayer.viewCounted = true;
+                }
+            });
+            
+            const videoOverlay = document.createElement('div');
+            videoOverlay.className = 'video-overlay';
+            
+            const topLeftInfo = document.createElement('div');
+            topLeftInfo.className = 'top-left-info';
+            topLeftInfo.innerHTML = `<h3>${videoData.user}</h3><p class="description">${videoData.description}</p><div class="music-info"><i class="fas fa-music"></i><span>${videoData.music}</span></div>`;
+            
+            const bottomLeftActions = document.createElement('div');
+            bottomLeftActions.className = 'bottom-left-actions';
+            
+            const profileContainer = document.createElement('div');
+            profileContainer.className = 'profile-picture-container';
+            
+            const profilePicture = document.createElement('div');
+            profilePicture.className = 'profile-picture';
+            profilePicture.style.backgroundImage = `url('${videoData.profileImg}')`;
+
+            const followButton = document.createElement('div');
+            followButton.className = 'follow-button';
+            followButton.textContent = '+';
+            
+            const isMyVideo = loggedInUser && videoData.user === `@${loggedInUser.username}`;
+            const isAlreadyFollowing = videoData.isFollowingUser;
+
+            if (isMyVideo || isAlreadyFollowing) {
+                followButton.style.display = 'none';
+            } else {
+                 // ==== MODIFICADO: El botón ahora abre el modal de confirmación ====
+                 followButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (!loggedInUser) {
+                        alert("Debes iniciar sesión para seguir canales.");
+                        return;
+                    }
+                    const targetUser = videoData.user.substring(1);
+                    showFollowConfirmModal(targetUser); // Llama al nuevo modal
+                });
+            }
+
+            profileContainer.append(profilePicture, followButton);
+
+            const likeArea = document.createElement('div');
+            likeArea.className = 'interaction-area';
+            likeArea.innerHTML = `<div class="icon"><i class="fas fa-heart"></i></div><span class="count">${videoData.likes}</span>`;
+            if (videoData.isLikedByCurrentUser) {
+                likeArea.querySelector('.icon').classList.add('liked');
+            }
+            likeArea.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (videoData.user === `@${loggedInUser.username}`) {
+                    alert("No puedes dar like a tus propios videos.");
+                    return;
+                }
+                if (videoData.videoId && loggedInUser) {
+                    handleLikeClick(likeArea, videoData.videoId);
+                } else {
+                    alert("Debes iniciar sesión para dar like.");
+                }
+            });
+            
+            const commentArea = document.createElement('div');
+            commentArea.className = 'interaction-area';
+            commentArea.innerHTML = `<div class="icon"><i class="far fa-comments"></i></div><span class="count">${videoData.comments}</span>`;
+            if (videoData.videoId) {
+                commentArea.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    loadComments(videoData.videoId);
+                    commentsPanelContainer.classList.add('active');
+                });
+            }
+            
+            const viewsArea = document.createElement('div');
+            viewsArea.className = 'interaction-area';
+            viewsArea.innerHTML = `<div class="icon"><i class="fas fa-chart-bar"></i></div><span class="count">${videoData.visualizaciones}</span>`;
+            
+            bottomLeftActions.append(profileContainer, likeArea, commentArea, viewsArea);
+            
+            const optionsIcon = document.createElement('div');
+            optionsIcon.className = 'options-icon';
+            optionsIcon.innerHTML = `<i class="fas fa-ellipsis-h"></i>`;
+            
+            const volumeIndicator = document.createElement('div');
+            volumeIndicator.className = 'volume-indicator';
+            volumeIndicator.innerHTML = videoPlayer.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+            
+            videoWrapper.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (videoPlayer.paused) {
+                    videoPlayer.play();
+                    hidePlayIndicator(videoWrapper);
+                } else {
+                    videoPlayer.pause();
+                    showPlayIndicator(videoWrapper);
+                }
+            });
+
+            volumeIndicator.addEventListener('click', (e) => {
+                e.stopPropagation();
+                videoPlayer.muted = !videoPlayer.muted;
+                volumeIndicator.innerHTML = videoPlayer.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+                volumeIndicator.classList.add('show');
+                setTimeout(() => volumeIndicator.classList.remove('show'), 800);
+            });
+            
+            profilePicture.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.href = `Streamer.html?user=${videoData.user.substring(1)}`;
+            });
+            
+            optionsIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelector('.options-menu-container').classList.add('active');
+            });
+            
+            videoWrapper.append(videoPlayer, videoOverlay, topLeftInfo, bottomLeftActions, optionsIcon, volumeIndicator);
+            return videoWrapper;
+        }
+
+
+        function updateVideoState() {
+            loadedVideoElements.forEach((wrapper, index) => {
+                const video = wrapper.querySelector('video');
+                const audio = wrapper.querySelector('audio');
+                wrapper.style.transform = `translateY(${(index - currentVideoIndex) * 100}%)`;
+                
+                if (!video.src) {
+                    video.src = wrapper.videoData.videoUrl;
+                }
+                
+                if (index === currentVideoIndex) {
+                    if (audio) {
+                        audio.currentTime = 0;
+                        audio.muted = false;
+                        audio.play().catch(e => console.log("Fallo al reproducir audio:", e));
+                    }
+                    video.play().catch(e => {
+                        console.log("Autoplay bloqueado, requiere interacción del usuario:", e);
+                        showPlayIndicator(wrapper);
+                    });
+                } else {
+                    video.pause();
+                    video.currentTime = 0;
+                    video.viewCounted = false;
+                    if(audio) {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    }
+                    hidePlayIndicator(wrapper);
+                }
+            });
+        }
+
+
+        function showPlayIndicator(wrapper) {
+            hidePlayIndicator(wrapper);
+            const playIndicator = document.createElement('div');
+            playIndicator.className = 'play-indicator';
+            playIndicator.innerHTML = '<i class="fas fa-play"></i>';
+            playIndicator.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const video = wrapper.querySelector('video');
+                video.muted = false;
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => hidePlayIndicator(wrapper))
+                               .catch(error => console.error("Error al reproducir video:", error));
+                }
+            });
+            wrapper.appendChild(playIndicator);
+        }
+
+        // ==== NUEVO: Funciones para manejar los modales de "seguir" ====
+        function showFollowModal(message) {
+            const followModal = document.getElementById('follow-modal');
+            const followMessage = document.getElementById('follow-message');
+            followMessage.textContent = message;
+            followModal.classList.add('show');
+            setTimeout(() => followModal.classList.remove('show'), 2500);
+        }
+
+        function showFollowConfirmModal(username) {
+            targetUserToFollow = username;
+            followConfirmUsernameSpan.textContent = `@${username}`;
+            resetSlider(); 
+            followConfirmModal.classList.add('show');
+        }
+
+        function hideFollowConfirmModal() {
+            followConfirmModal.classList.remove('show');
+            targetUserToFollow = null;
+        }
+
+        function resetSlider() {
+            sliderThumb.style.transition = 'left 0.3s ease';
+            sliderThumb.style.left = '4px';
+            sliderContainer.querySelector('.slider-text').style.opacity = 1;
+            setTimeout(() => {
+                 sliderThumb.style.transition = ''; 
+            }, 300);
+        }
+
+        async function executeFollow() {
+            if (!targetUserToFollow || !loggedInUser) return;
+
+            sliderThumb.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'followUser', follower: loggedInUser.username, following: targetUserToFollow })
+                });
+                const result = await response.json();
+                hideFollowConfirmModal();
+
+                if (result.success) {
+                    updateAllVideosFollowStatus(targetUserToFollow, true);
+                    showFollowModal(result.message);
+                } else {
+                     if (result.message.includes("Ya sigues")) {
+                        updateAllVideosFollowStatus(targetUserToFollow, true);
+                     }
+                     showFollowModal(result.message);
+                }
+            } catch (error) {
+                hideFollowConfirmModal();
+                showFollowModal('Error al seguir el canal.');
+                console.error("Error al seguir:", error);
+            } finally {
+                sliderThumb.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                resetSlider();
+            }
+        }
+
+
+        function updateAllVideosFollowStatus(username, isFollowing) {
+            loadedVideoElements.forEach(wrapper => {
+                if (wrapper.videoData && wrapper.videoData.user === `@${username}`) {
+                    wrapper.videoData.isFollowingUser = isFollowing;
+                    const followBtn = wrapper.querySelector('.follow-button');
+                    if (followBtn && isFollowing) {
+                        followBtn.style.display = 'none';
+                    }
+                }
+            });
+            videosToPlayQueue.forEach(video => {
+                if (video.user === `@${username}`) video.isFollowingUser = isFollowing;
+            });
+            allVideosMasterList.forEach(video => {
+                if (video.user === `@${username}`) video.isFollowingUser = isFollowing;
+            });
+        }
+
+
+        function hidePlayIndicator(wrapper) {
+            const existingIndicator = wrapper.querySelector('.play-indicator');
+            if (existingIndicator) existingIndicator.remove();
+        }
+
+        async function initialize() {
+            loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            if (loggedInUser?.imageUrl) {
+                document.querySelector('.my-profile-picture').style.backgroundImage = `url('${loggedInUser.imageUrl}')`;
+                document.querySelector('.my-avatar-comment').style.backgroundImage = `url('${loggedInUser.imageUrl}')`;
+            }
+            loadingSpinner.style.display = 'block';
+            allVideosMasterList = await fetchAllVideoMetadata();
+            
+            if (allVideosMasterList.length > 0) {
+                await restoreVideoState();
+                if (videosToPlayQueue.length === 0) {
+                    videosToPlayQueue = [...allVideosMasterList];
+                    shuffleArray(videosToPlayQueue);
+                }
+                const initialLoadCount = Math.min(3, videosToPlayQueue.length);
+                for (let i = 0; i < initialLoadCount; i++) {
+                    const videoData = videosToPlayQueue.shift();
+                    const newVideoElement = createVideoElement(videoData);
+                    videoContainer.appendChild(newVideoElement);
+                    loadedVideoElements.push(newVideoElement);
+                }
+                loadingSpinner.style.display = 'none';
+                updateVideoState();
+            } else {
+                loadingSpinner.innerHTML = `<img src="https://i.postimg.cc/PJm3mRTH/image.png" alt="Likering Logo"><p>No hay videos disponibles.</p>`;
+            }
+        }
+
+        let isSwiping = false;
+        let startY = 0;
+        const handleSwipe = (direction) => {
+            if (isSwiping) return;
+            isSwiping = true;
+            const newIndex = currentVideoIndex + direction;
+            if (newIndex >= 0 && newIndex < loadedVideoElements.length) {
+                currentVideoIndex = newIndex;
+                saveCurrentVideoState();
+                if (direction > 0 && currentVideoIndex === loadedVideoElements.length - 1) {
+                    if (videosToPlayQueue.length === 0) replenishVideoQueue();
+                    const nextVideoData = videosToPlayQueue.shift();
+                    if (nextVideoData) {
+                        const newVideoElement = createVideoElement(nextVideoData);
+                        videoContainer.appendChild(newVideoElement);
+                        loadedVideoElements.push(newVideoElement);
+                    }
+                }
+                if (loadedVideoElements.length > 5) {
+                    if (direction > 0) {
+                        loadedVideoElements[0].remove();
+                        loadedVideoElements.shift();
+                        currentVideoIndex--;
+                    }
+                }
+                updateVideoState();
+            }
+            setTimeout(() => { isSwiping = false; }, 450);
+        };
+        videoContainer.addEventListener('wheel', e => {
+            e.preventDefault();
+            handleSwipe(e.deltaY > 0 ? 1 : -1);
+        }, { passive: false });
+        videoContainer.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+        videoContainer.addEventListener('touchend', e => {
+            const endY = e.changedTouches[0].clientY;
+            const deltaY = startY - endY;
+            if (Math.abs(deltaY) > 50) handleSwipe(deltaY > 0 ? 1 : -1);
+        }, { passive: true });
+        
+        // ==== NUEVO: Event Listeners para el slider de confirmación ====
+        cancelFollowBtn.addEventListener('click', hideFollowConfirmModal);
+
+        const startSlide = (e) => {
+            isSliding = true;
+            sliderThumb.style.cursor = 'grabbing';
+            sliderThumb.style.transition = 'none';
+            sliderContainer.querySelector('.slider-text').style.opacity = 0;
+            startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            initialThumbX = sliderThumb.offsetLeft;
+        };
+
+        const onSlide = (e) => {
+            if (!isSliding) return;
+            e.preventDefault();
+            const currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            let moveX = currentX - startX;
+            let newLeft = Math.max(4, Math.min(initialThumbX + moveX, sliderContainer.offsetWidth - sliderThumb.offsetWidth - 4));
+            sliderThumb.style.left = `${newLeft}px`;
+        };
+
+        const endSlide = (e) => {
+            if (!isSliding) return;
+            isSliding = false;
+            sliderThumb.style.cursor = 'grab';
+            const threshold = sliderContainer.offsetWidth * 0.7;
+            if (sliderThumb.offsetLeft + sliderThumb.offsetWidth > threshold) {
+                 sliderThumb.style.left = `${sliderContainer.offsetWidth - sliderThumb.offsetWidth - 4}px`;
+                 executeFollow();
+            } else {
+                resetSlider();
+            }
+        };
+
+        sliderThumb.addEventListener('mousedown', startSlide);
+        document.addEventListener('mousemove', onSlide);
+        document.addEventListener('mouseup', endSlide);
+        sliderThumb.addEventListener('touchstart', startSlide, { passive: false });
+        document.addEventListener('touchmove', onSlide, { passive: false });
+        document.addEventListener('touchend', endSlide);
+
+        const profileBadge = document.querySelector('.my-profile-badge');
+        const profileMenuContainer = document.querySelector('.floating-menu-container');
+        const floatingMenu = document.querySelector('.floating-menu');
+        const optionsMenuContainer = document.querySelector('.options-menu-container');
+        const optionsMenu = document.querySelector('.options-menu');
+        const shareMenuContainer = document.querySelector('.share-menu-container');
+        const closeShareButton = document.querySelector('.close-share');
+        const shareButton = document.getElementById('share-btn');
+        const downloadButton = document.getElementById('download-btn');
+        const downloadOverlay = document.querySelector('.download-progress-overlay');
+        const downloadStatus = document.getElementById('download-status');
+
+        profileBadge.addEventListener('click', e => {
+            e.stopPropagation();
+            profileMenuContainer.classList.toggle('active')
+        });
+        profileMenuContainer.addEventListener('click', () => profileMenuContainer.classList.remove('active'));
+        floatingMenu.addEventListener('click', e => e.stopPropagation());
+        optionsMenuContainer.addEventListener('click', () => optionsMenuContainer.classList.remove('active'));
+        optionsMenu.addEventListener('click', e => e.stopPropagation());
+        shareButton.addEventListener('click', e => {
+            e.stopPropagation();
+            optionsMenuContainer.classList.remove('active');
+            shareMenuContainer.classList.add('active');
+        });
+        closeShareButton.addEventListener('click', () => shareMenuContainer.classList.remove('active'));
+        shareMenuContainer.addEventListener('click', e => {
+            if (e.target === shareMenuContainer) shareMenuContainer.classList.remove('active')
+        });
+        downloadButton.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            optionsMenuContainer.classList.remove('active');
+            const currentVideoData = loadedVideoElements[currentVideoIndex]?.videoData;
+            if (!currentVideoData || !currentVideoData.videoUrl) {
+                alert('No se pudo encontrar la URL del video para descargar.');
+                return;
+            }
+            downloadOverlay.classList.add('active');
+            downloadStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparando descarga...';
+            try {
+                const response = await fetch(currentVideoData.videoUrl);
+                if (!response.ok) throw new Error('No se pudo conectar con el servidor del video.');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                const filename = `${currentVideoData.user.substring(1)}_${currentVideoData.music.replace(/[^a-z0-9]/gi, '_')}.mp4`;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+                downloadStatus.innerHTML = '<i class="fas fa-check-circle"></i> ¡Descargado!';
+                setTimeout(() => downloadOverlay.classList.remove('active'), 1500);
+            } catch (error) {
+                console.error('Error al descargar el video:', error);
+                downloadStatus.innerHTML = '<i class="fas fa-times-circle"></i> Error al descargar';
+                setTimeout(() => downloadOverlay.classList.remove('active'), 2500);
+            }
+        });
+
+    document.getElementById('logout-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        const confirmLogout = confirm('¿Estás seguro de que quieres cerrar sesión?');
+        if (confirmLogout) {
+            localStorage.removeItem('loggedInUser');
+            localStorage.removeItem('userVideos');
+            localStorage.removeItem('userPreferences');
+            window.location.href = 'index.html';
+        }
+        
+        profileMenuContainer.classList.remove('active');
+    });
+
+        
+        initialize();
+    });
+
+</script>
+</body>
+</html>
