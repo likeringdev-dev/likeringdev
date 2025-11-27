@@ -328,13 +328,13 @@
     </div>
 
     <script>
-        // --- URL de tu Web App de Google Apps Script ---
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzl-Bh6ZY2eiEn_Hv6eHu4Av2STOp0hWVcCQpfBOElOZggrWtVpLcFLCXqBASgJuaU7A/exec";
+        // --- URLs de servicios externos (la URL de Apps Script fue eliminada/comentada) ---
+        // const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzl-Bh6ZY2eiEn_Hv6eHu4Av2STOp0hWVcCQpfBOElOZggrWtVpLcFLCXqBASgJuaU7A/exec";
         
-        // --- URL de tu API Key de ImgBB ---
+        // --- URL de tu API Key de ImgBB (se mantiene ya que la subida de imagen se hace desde el frontend) ---
         const IMGBB_API_KEY = "df01bb05ce03159d54c33e1e22eba2cf";
 
-        window.addEventListener('load', async () => { // Changed to async to support silent login check
+        window.addEventListener('load', async () => {
             const splashScreen = document.querySelector('.splash-screen');
             const mainContent = document.querySelector('.main-content');
             const loginForm = document.getElementById('login-form');
@@ -386,14 +386,16 @@
                 loginForm.style.display = 'block';
             });
 
-            // --- Login Function ---
+            // --- Login Function (MODIFICADA para usar el endpoint /api/login) ---
             async function attemptLogin(username, password) {
                 try {
-                    const response = await fetch(SCRIPT_URL, {
+                    // *** Uso del endpoint de Flask para Login ***
+                    const response = await fetch('/api/login', {
                         method: 'POST',
-                        body: JSON.stringify({ action: 'login', username: username, password: password }),
+                        // Se envía solo username y password, como espera app.py
+                        body: JSON.stringify({ username: username, password: password }),
                         headers: {
-                            'Content-Type': 'text/plain;charset=utf-8',
+                            'Content-Type': 'application/json', // Tipo de contenido JSON
                         },
                     });
 
@@ -422,7 +424,7 @@
                 }
             }
 
-            // --- LÓGICA DE LOGIN CON APPS SCRIPT (CORREGIDA) ---
+            // --- LÓGICA DE LOGIN ---
             const loginBtn = document.getElementById('login-btn');
             loginBtn.addEventListener('click', async (event) => {
                 event.preventDefault();
@@ -496,6 +498,7 @@
                 formData.append('image', imageFile);
 
                 try {
+                    // Paso 1: Subir imagen a ImgBB
                     const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
                         method: 'POST',
                         body: formData
@@ -506,12 +509,13 @@
                     }
                     const imageUrl = imgbbData.data.url;
 
-                    // Updated to use POST for registration as well for consistency and to avoid URL length limits
-                    const scriptResponse = await fetch(SCRIPT_URL, {
+                    // Paso 2: Registrar usuario en el servidor Flask (MODIFICADO para usar /api/register)
+                    const scriptResponse = await fetch('/api/register', {
                         method: 'POST',
-                        body: JSON.stringify({ action: 'register', username: username, password: password, imageUrl: imageUrl }),
+                        // Se envían los datos como espera app.py
+                        body: JSON.stringify({ username: username, password: password, imageUrl: imageUrl }),
                         headers: {
-                            'Content-Type': 'text/plain;charset=utf-8',
+                            'Content-Type': 'application/json', // Tipo de contenido JSON
                         },
                     });
                     const scriptData = await scriptResponse.json(); // Expect JSON response
@@ -519,6 +523,8 @@
                     alert(scriptData.message); // Show message from backend
                     
                     if (scriptData.success) { // Check for success boolean
+                        // Simular los datos que devolvería el backend si fuera necesario, aunque el backend de Flask
+                        // ya devuelve un mensaje de éxito/error. Para el caso de PostgreSQL, el plan es 'azul' por defecto.
                         localStorage.setItem('loggedInUser', JSON.stringify({
                             username: username,
                             imageUrl: imageUrl,
