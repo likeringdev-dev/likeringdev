@@ -66,50 +66,52 @@ def editor():
 # ==================== API ENDPOINTS ====================
 
 # API: Registro de usuario
+# API: Registro de nuevos usuarios
 @app.route('/api/register', methods=['POST'])
 def register():
     try:
         data = request.get_json()
         username = data.get('username')
         password = data.get('password')
-        image_url = data.get('imageUrl')
+        # Asumiendo que el campo de la URL de la imagen se llama 'imageUrl' en el frontend
+        imageUrl = data.get('imageUrl') 
         
-        if not username or not password:
-            return jsonify({'success': False, 'message': 'Usuario y contraseña requeridos'}), 400
-        
+        if not all([username, password, imageUrl]):
+            return jsonify({'success': False, 'message': 'Faltan datos de registro (usuario, contraseña o imagen)'}), 400
+
+        hashed_password = hash_password(password)
+
         conn = get_db_connection()
         if not conn:
-            return jsonify({'success': False, 'message': 'Error de conexión'}), 500
+            return jsonify({'success': False, 'message': 'Error de conexión a la base de datos'}), 500
         
         cur = conn.cursor()
         
-        # Verificar si el usuario ya existe
-        cur.execute('SELECT username FROM usuarios WHERE username = %s', (username,))
+        # 1. Verificar si el usuario ya existe
+        cur.execute("SELECT id FROM usuarios WHERE username = %s", (username,))
         if cur.fetchone():
             cur.close()
             conn.close()
-            return jsonify({'success': False, 'message': 'El usuario ya existe'}), 400
-        
-        # Crear nuevo usuario
-        password_hash = hash_password(password)
+            return jsonify({'success': False, 'message': 'El nombre de usuario ya existe'}), 409
+
+        # 2. Insertar nuevo usuario en la tabla 'usuarios'
+        # Usamos gen_random_uuid() para el ID y 'azul' como plan por defecto, basado en tus snippets y la imagen
         cur.execute('''
-            INSERT INTO usuarios (username, password, image_url, plan)
-            VALUES (%s, %s, %s, %s)
-            RETURNING id
-        ''', (username, password_hash, image_url, 'azul'))
+            INSERT INTO usuarios (id, username, password, plan, image_url)
+            VALUES (gen_random_uuid(), %s, %s, %s, %s)
+            RETURNING id;
+        ''', (username, hashed_password, 'azul', imageUrl))
         
         conn.commit()
         cur.close()
         conn.close()
         
-        return jsonify({
-            'success': True,
-            'message': 'Usuario registrado exitosamente'
-        })
+        # Respuesta exitosa que el frontend espera
+        return jsonify({'success': True, 'message': 'Registro exitoso'})
         
     except Exception as e:
-        print(f"Error en registro: {e}")
-        return jsonify({'success': False, 'message': str(e)}), 500
+        print(f"Error en la ruta /api/register: {e}")
+        return jsonify({'success': False, 'message': f'Error interno del servidor: {str(e)}'}), 500
 
 # API: Login de usuario
 @app.route('/api/login', methods=['POST'])
